@@ -56,14 +56,27 @@
             el.classList.add('fp-ready');
         });
 
-        // Tom Select — any .tom-select element
-        root.querySelectorAll('.tom-select:not(.ts-ready)').forEach(function (el) {
-            new TomSelect(el, {
+        // Tom Select — any .tom-select element. Use [data-ts-ready] sentinel
+        // (set as an attribute on the underlying <select>) so we don't double-init
+        // after Livewire morphs / page navigates. We also defensively strip
+        // the `ts-hidden-accessible` helper class from the wrapper because
+        // Tom Select v2 copies the original element's full class attribute onto
+        // its wrapper at setup time — and if the original <select> was already
+        // tagged as hidden-accessible from a prior life (e.g. before Livewire
+        // restored the DOM), the wrapper inherits a 1px clipped layout.
+        root.querySelectorAll('select.tom-select:not([data-ts-ready])').forEach(function (el) {
+            // Strip leftover Tom Select state classes from the underlying <select>
+            // before initialising so the wrapper does not inherit them.
+            el.classList.remove('tomselected', 'ts-hidden-accessible');
+            var ts = new TomSelect(el, {
                 create: false,
                 allowEmptyOption: true,
                 plugins: el.multiple ? ['remove_button'] : [],
             });
-            el.classList.add('ts-ready');
+            el.setAttribute('data-ts-ready', '1');
+            if (ts.wrapper) {
+                ts.wrapper.classList.remove('ts-hidden-accessible', 'tomselected');
+            }
         });
     };
 

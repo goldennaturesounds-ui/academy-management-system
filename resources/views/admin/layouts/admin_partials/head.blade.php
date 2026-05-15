@@ -45,7 +45,6 @@
     <title>@yield('pageTitle', __('app.brand'))</title>
 
     @livewireStyles
-    @flasher_render
 
     @stack('styles')
 </head>
